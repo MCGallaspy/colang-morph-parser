@@ -16,7 +16,8 @@ if words_file is not None:
     st.header("File preview")
     st.write(df.head())
 else:
-    st.stop("Select a words file to continue")
+    st.error("Select a words file to continue")
+    st.stop()
 
 cols = list(df)
 words_col = st.selectbox(
