@@ -9,34 +9,38 @@ from itertools import product
 from models import SimpleModel
 
 st.subheader("Input specification")
-words_file = st.file_uploader("Upload a tsv with words to analyze")
-sep = st.text_input("Separator character", value=r"\t")
-if words_file is not None:
-    df = pd.read_csv(words_file, sep=sep)
-    st.header("File preview")
-    st.write(df.head())
-else:
-    st.error("Select a words file to continue")
-    st.stop()
 
-cols = list(df)
-words_col = st.selectbox(
-    "Which column has input words?",
-    cols,
+dataset_dirs = os.listdir("datasets")
+dataset_dir = st.selectbox(
+    "Choose a dataset on which to train:",
+    dataset_dirs,
 )
-specials = st.text_input("Comma-separated list of special input tokens (e.g. PAD or UNK)")
+
+labeled_df = None
+try:
+    labeled_df = pd.read_csv(os.path.join('datasets', dataset_dir, 'labeled.tsv'), sep='\t', index_col=0)
+except FileNotFoundError:
+    pass
+unlabeled_df = pd.read_csv(os.path.join('datasets', dataset_dir, 'unlabeled.tsv'), sep='\t', index_col=0)
+
+specials = st.text_input(
+    "Comma-separated list of special input tokens (e.g. PAD or UNK)",
+    value="PAD,UNK"
+)
 specials = [s.strip() for s in specials.split(",")]
 specials = [s for s in specials if s]
 input_alphabet = set()
-if words_col:
-    for word in df[words_col].values:
-        input_alphabet |= set(word)
-    input_alphabet |= set(specials)
-    input_alphabet = dict((w, i) for (i, w) in enumerate(input_alphabet))
-    d_input = len(input_alphabet)
-    st.write(f"Input dimensionality: {d_input}")
-    st.write("Input alphabet")
-    st.write(input_alphabet)
+all_words = unlabeled_df.iloc[:, 0].values.tolist()
+if labeled_df:
+    all_words += labeled_df.iloc[:, 0].values.tolist()
+for word in all_words:
+    input_alphabet |= set(word)
+input_alphabet |= set(specials)
+input_alphabet = dict((w, i) for (i, w) in enumerate(input_alphabet))
+d_input = len(input_alphabet)
+st.write(f"Input dimensionality: {d_input}")
+st.write("Input alphabet")
+st.write(input_alphabet)
 
 
 st.subheader("Output specification")
