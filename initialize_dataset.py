@@ -40,10 +40,19 @@ if st.button("Instantiate!"):
     
     if morph_col != "None":
         mask = ~df[morph_col].isna()
-        df.loc[mask, [words_col, morph_col]].to_csv(os.path.join(base, "labeled.tsv"), sep='\t')
-        df.loc[~mask, words_col].to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
+        
+        tmp = df.loc[mask, [words_col, morph_col]]
+        tmp.columns = ["word", "morphology"]
+        tmp.to_csv(os.path.join(base, "labeled.tsv"), sep='\t')
+        
+        tmp = df.loc[~mask, words_col]
+        tmp.name = "word"
+        tmp.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
     else:
-        df.loc[:, words_col].to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
+        tmp = df.loc[:, words_col]
+        tmp.name = "word"
+        print(tmp.head())
+        tmp.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
     
     metadata_dict = os.path.join(base, "metadata.json")
     with open(metadata_dict, "w") as f:

@@ -92,10 +92,70 @@ def calc_entropy(model, df):
     result.name = 'entropy'
     return result
 
-if not st.button("Calculate entropy"):
+if st.button("Calculate entropy"):
+    with st.spinner("Calculating entropy..."):
+        entropy = calc_entropy(model, unlabeled_df)
+    st.session_state['entropy'] = entropy
+    st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
+    st.session_state['current_gloss'] = []
+
+if st.session_state.get('entropy') is None:
+    st.warning("You must calculate the entropy first")
     st.stop()
 
-with st.spinner("Calculating entropy..."):
-    entropy = calc_entropy(model, unlabeled_df)
+entropy_df = unlabeled_df.join(st.session_state.entropy)
+entropy_df = entropy_df.drop(st.session_state.labeled_df.index)
+entropy_df.sort_values(by='entropy', ascending=False)
+highest_entropy_row = entropy_df.iloc[0]
 
-st.write(unlabeled_df.join(entropy))
+st.write(f"Total entropy = {entropy_df.entropy.sum():.1f}")
+st.write(f"Average entropy = {entropy_df.entropy.mean():.1f}")
+
+st.write(f"Highest entropy word: {highest_entropy_row.word}")
+st.write("Gloss under construction:")
+st.write(st.session_state.current_gloss)
+
+gloss_element = st.selectbox(
+    "Add gloss element",
+    list(output_alphabet.keys()),
+)
+
+if st.button("Add selected element"):
+    st.session_state.current_gloss.append(gloss_element)
+    st.rerun()
+
+if st.button("Add UNK"):
+    st.session_state.current_gloss.append("UNK")
+    st.rerun()
+
+if st.button("Reset gloss"):
+    st.session_state.current_gloss = []
+    st.rerun()
+
+if st.button("Finish gloss"):
+    st.session_state.labeled_df.loc[highest_entropy_row.name] = [
+        highest_entropy_row.word,
+        st.session_state.current_gloss,
+    ]
+    st.session_state.current_gloss = []
+    st.rerun()
+
+st.write("Newly labeled data")
+st.write(st.session_state.labeled_df)
+
+def add_gloss_start_end(glosses):
+    if glosses[0] != "GLOSS_START":
+        glosses = ["GLOSS_START"] + glosses
+    if glosses[-1] != "GLOSS_END":
+        glosses += ["GLOSS_END"]
+    return glosses
+
+if st.button("Update datasets"):
+    base = os.path.join("datasets", dataset_dir)
+    unlabeled_df = unlabeled_df.drop(st.session_state.labeled_df.index)
+    unlabeled_df.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
+    labeled_df = st.session_state.labeled_df
+    labeled_df["morphology"] = labeled_df["morphology"].apply(add_gloss_start_end).apply(lambda xs: ";".join(xs))
+    labeled_df.to_csv(os.path.join(base, "labeled.tsv"), sep='\t')
+    st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
+    st.session_state.current_gloss = []
