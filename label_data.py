@@ -104,7 +104,8 @@ if st.session_state.get('entropy') is None:
     st.stop()
 
 entropy_df = unlabeled_df.join(st.session_state.entropy)
-entropy_df = entropy_df.drop(st.session_state.labeled_df.index)
+already_labeled_df = pd.read_csv(os.path.join("datasets", dataset_dir, "labeled.tsv"), sep="\t", index_col=0)
+entropy_df = entropy_df.drop(set(already_labeled_df.index) | set(st.session_state.labeled_df.index))
 entropy_df.sort_values(by='entropy', ascending=False)
 highest_entropy_row = entropy_df.iloc[0]
 
@@ -152,10 +153,10 @@ def add_gloss_start_end(glosses):
 
 if st.button("Update datasets"):
     base = os.path.join("datasets", dataset_dir)
-    unlabeled_df = unlabeled_df.drop(st.session_state.labeled_df.index)
-    unlabeled_df.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
     labeled_df = st.session_state.labeled_df
     labeled_df["morphology"] = labeled_df["morphology"].apply(add_gloss_start_end).apply(lambda xs: ";".join(xs))
-    labeled_df.to_csv(os.path.join(base, "labeled.tsv"), sep='\t')
+    already_labeled_df = pd.read_csv(os.path.join("datasets", dataset_dir, "labeled.tsv"), sep="\t", index_col=0)
+    pd.concat([already_labeled_df, labeled_df]).to_csv(os.path.join(base, "labeled.tsv"), sep='\t')
     st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
     st.session_state.current_gloss = []
+    st.success("Done!")

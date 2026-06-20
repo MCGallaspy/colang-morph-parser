@@ -31,7 +31,7 @@ specials = [s.strip() for s in specials.split(",")]
 specials = [s for s in specials if s]
 input_alphabet = set()
 all_words = unlabeled_df.iloc[:, 0].values.tolist()
-if labeled_df:
+if labeled_df is not None:
     all_words += labeled_df.iloc[:, 0].values.tolist()
 for word in all_words:
     input_alphabet |= set(word)
@@ -72,7 +72,7 @@ if any(inflectional_sets):
 st.markdown("**Special output tokens**")
 output_specials = st.text_input(
     "Comma-separated list of special output tokens",
-    value="GLOSS_START, GLOSS_END",
+    value="GLOSS_START, GLOSS_END, UNK",
 )
 output_specials = [s.strip() for s in output_specials.split(",")]
 output_specials = [s for s in output_specials if s]
