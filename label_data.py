@@ -6,6 +6,7 @@ import torch
 import tqdm
 
 from models import SimpleModel
+from utils import encode_input, get_output
 
 os.makedirs("models", exist_ok=True)
 model_dirs = os.listdir("models")
@@ -37,39 +38,6 @@ with open(output_dict_fn, "r") as f:
     output_alphabet = json.load(f)
 output_reversal = dict((i, k) for (k, i) in output_alphabet.items())
 
-def encode_input(word):
-    idxs = []
-    for c in word:
-        try:
-            idxs.append(input_dict[c])
-        except KeyError:
-            idxs.append(input_dict["UNK"])
-    result = []
-    for idx in idxs:
-        t = torch.zeros(len(input_dict))
-        t[idx] = 1
-        result.append(t)
-    result = torch.stack(result)
-    if result.dim() == 1:
-        result = result.unsqueeze(0)
-    return result
-
-def get_output(model, seq):
-    result = [torch.Tensor([-99999] * len(output_alphabet))]
-    result[0][output_alphabet["GLOSS_START"]] = 0
-    MAX_LEN = 5
-    with torch.no_grad():
-        for _ in range(MAX_LEN):
-            mask = torch.nn.Transformer.generate_square_subsequent_mask(len(result))
-            next = model(seq, torch.stack(result), tgt_mask=mask, tgt_is_causal=True)
-            argmax = torch.argmax(next[-1])
-            result.append(next[-1])
-            if argmax == output_alphabet["GLOSS_END"]:
-                break
-    
-    return torch.stack(result)
-    st.write([output_reversal[int(torch.argmax(y))] for y in result])
-
 def get_entropy(log_probs):
     probs = torch.exp(log_probs)
     return torch.sum(probs * log_probs * -1)
@@ -79,8 +47,8 @@ pbar = tqdm.tqdm(total=nrows)
 
 def forward_pass(word):
     try:
-        encoded = encode_input(word)
-        model_out = get_output(model, encoded)
+        encoded = encode_input(word, input_dict)
+        model_out = get_output(model, encoded, output_alphabet)
         entropy = get_entropy(model_out)
     except RuntimeError:
         entropy = 0
