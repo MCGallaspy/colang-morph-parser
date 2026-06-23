@@ -63,7 +63,7 @@ def get_output_sequence(gloss):
     gloss = [g.strip() for g in gloss.split(";")]
     seq_len = len(gloss)
     output_dim = len(output_dict)
-    y = torch.Tensor([[1e-9999] * output_dim] * seq_len)
+    y = torch.Tensor([[-99999] * output_dim] * seq_len)
     for seq_idx, g in enumerate(gloss):
         try:
             gloss_idx = output_dict[g]
@@ -101,7 +101,6 @@ if st.button("Train"):
     torch.save(model, os.path.join(base, "model.pt"))
     st.success("Model weights saved!")
 
-    st.write(losses)
     fig = plt.figure()
     pd.Series(losses).plot(ax=plt.gca())
     st.pyplot(fig)

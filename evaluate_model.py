@@ -64,20 +64,22 @@ def get_preds(model, df):
     result.pred = result.pred.apply(lambda x: ";".join(decode_output(x, reversal)))
     return result
 
-with st.spinner("Processing labeled data..."):
-    preds = get_preds(model, labeled_df)
+if st.button("Evaluate labeled data"):
+    with st.spinner("Processing labeled data..."):
+        preds = get_preds(model, labeled_df)
 
-labeled_df = labeled_df.join(preds)
-labeled_df.entropy = labeled_df.entropy.apply(float)
-labeled_df['correct'] = labeled_df.morphology == labeled_df.pred 
-st.markdown("## Model predictions on labeled data") 
-st.write(f"Accuracy: {labeled_df.correct.sum() / labeled_df.shape[0]:.1%}")
-st.write(labeled_df.sort_values(by='entropy', ascending=True))
+    labeled_df = labeled_df.join(preds)
+    labeled_df.entropy = labeled_df.entropy.apply(float)
+    labeled_df['correct'] = labeled_df.morphology == labeled_df.pred 
+    st.markdown("## Model predictions on labeled data") 
+    st.write(f"Accuracy: {labeled_df.correct.sum() / labeled_df.shape[0]:.1%}")
+    st.write(labeled_df.sort_values(by='entropy', ascending=True))
 
-with st.spinner("Processing unlabeled data..."):
-    preds = get_preds(model, unlabeled_df)
+if st.button("Evaluate unlabeled data"):
+    with st.spinner("Processing unlabeled data..."):
+        preds = get_preds(model, unlabeled_df)
 
-unlabeled_df = unlabeled_df.join(preds)
-unlabeled_df.entropy = unlabeled_df.entropy.apply(float)
-st.markdown("## Model predictions on unlabeled data") 
-st.write(unlabeled_df.sort_values(by='entropy', ascending=True))
+    unlabeled_df = unlabeled_df.join(preds)
+    unlabeled_df.entropy = unlabeled_df.entropy.apply(float)
+    st.markdown("## Model predictions on unlabeled data") 
+    st.write(unlabeled_df.sort_values(by='entropy', ascending=True))

@@ -34,6 +34,8 @@ morph_col = st.selectbox(
 st.subheader("Instantiate dataset")
 dataset_name = st.text_input("Dataset name", value="my cool dataset")
 
+fraction = st.number_input("Select a fraction of the unlabeled words to input", value=1.0)
+
 if st.button("Instantiate!"):
     base = os.path.join("datasets", dataset_name)
     os.makedirs(base, exist_ok=True)
@@ -47,12 +49,12 @@ if st.button("Instantiate!"):
         
         tmp = df.loc[~mask, words_col]
         tmp.name = "word"
-        tmp.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
+        tmp.sample(frac=fraction).to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
     else:
         tmp = df.loc[:, words_col]
         tmp.name = "word"
         print(tmp.head())
-        tmp.to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
+        tmp.sample(frac=fraction).to_csv(os.path.join(base, "unlabeled.tsv"), sep='\t')
     
     metadata_dict = os.path.join(base, "metadata.json")
     with open(metadata_dict, "w") as f:
