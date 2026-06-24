@@ -19,6 +19,8 @@ def encode_input(word, input_dict):
 
 def decode_output(seq, output_alphabet_reversal):
     result = []
+    if type(seq) == float:
+        seq = [seq]
     for subseq in seq:
         idx = int(torch.argmax(subseq))
         result.append(output_alphabet_reversal[idx])
