@@ -91,7 +91,7 @@ highest_entropy_row = entropy_df.iloc[0]
 st.write(f"Total entropy = {entropy_df.entropy.sum():.1f}")
 st.write(f"Average entropy = {entropy_df.entropy.mean():.1f}")
 
-st.write(f"Highest entropy word: {highest_entropy_row.word}")
+st.write(f"Highest entropy word: {highest_entropy_row.word} (entropy={highest_entropy_row.entropy:.2f})")
 st.write(f"Source file data on word:")
 st.write(source_df.loc[highest_entropy_row.name])
 st.write("Gloss under construction:")

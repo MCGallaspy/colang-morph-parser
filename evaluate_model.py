@@ -73,7 +73,7 @@ if st.button("Evaluate labeled data"):
     labeled_df.entropy = labeled_df.entropy.apply(float)
     labeled_df['correct'] = labeled_df.morphology == labeled_df.pred 
     st.markdown("## Model predictions on labeled data") 
-    st.write(f"Accuracy: {labeled_df.correct.sum() / labeled_df.shape[0]:.1%}")
+    st.write(f"Accuracy: {labeled_df.correct.sum() / labeled_df.shape[0]:.1%} ({labeled_df.correct.sum()} out of {labeled_df.shape[0]})")
     st.write(labeled_df.sort_values(by='entropy', ascending=True))
 
 frac = st.number_input("Fraction of unlabeled data to evaluate model on", value=0.1)
