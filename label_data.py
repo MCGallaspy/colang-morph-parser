@@ -85,7 +85,7 @@ try:
     entropy_df = entropy_df.drop(set(already_labeled_df.index) | set(st.session_state.labeled_df.index))
 except:
     entropy_df = entropy_df.drop(st.session_state.labeled_df.index)
-entropy_df.sort_values(by='entropy', ascending=False)
+entropy_df = entropy_df.sort_values(by='entropy', ascending=False)
 highest_entropy_row = entropy_df.iloc[0]
 
 st.write(f"Total entropy = {entropy_df.entropy.sum():.1f}")
