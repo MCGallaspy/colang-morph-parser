@@ -19,11 +19,12 @@ def encode_input(word, input_dict):
 
 def decode_output(seq, output_alphabet_reversal):
     result = []
-    if type(seq) == float:
-        seq = [seq]
-    for subseq in seq:
-        idx = int(torch.argmax(subseq))
-        result.append(output_alphabet_reversal[idx])
+    try:
+        for subseq in seq:
+            idx = int(torch.argmax(subseq))
+            result.append(output_alphabet_reversal[idx])
+    except TypeError:
+        pass
     return result
 
 def get_output(model, seq, output_alphabet):
@@ -41,7 +42,6 @@ def get_output(model, seq, output_alphabet):
                 break
     
     return torch.stack(result)
-    st.write([output_reversal[int(torch.argmax(y))] for y in result])
 
 def get_entropy(log_probs):
     probs = torch.exp(log_probs)
