@@ -43,22 +43,22 @@ def get_entropy(log_probs):
     probs = torch.exp(log_probs)
     return torch.sum(probs * log_probs * -1)
 
-nrows = unlabeled_df.shape[0]
-pbar = tqdm.tqdm(total=nrows)
-
-def forward_pass(row):
-    word = row.word
-    try:
-        encoded = encode_input(word, input_dict)
-        model_out = get_output(model, encoded, output_alphabet)
-        entropy = get_entropy(model_out)
-    except RuntimeError:
-        entropy = 0
-        model_out = None
-    pbar.update(1)
-    return model_out, entropy
-
 def get_preds(model, df):
+    nrows = df.shape[0]
+    pbar = tqdm.tqdm(total=nrows)
+
+    def forward_pass(row):
+        word = row.word
+        try:
+            encoded = encode_input(word, input_dict)
+            model_out = get_output(model, encoded, output_alphabet)
+            entropy = get_entropy(model_out)
+        except RuntimeError:
+            entropy = 0
+            model_out = None
+        pbar.update(1)
+        return model_out, entropy
+
     result = df.apply(forward_pass, axis=1, result_type='expand')
     result.columns = ['pred', 'entropy']
     reversal = dict((v, k) for (k, v) in output_alphabet.items())
