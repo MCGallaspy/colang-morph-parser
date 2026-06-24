@@ -38,12 +38,14 @@ with open(output_dict_fn, "r") as f:
     output_alphabet = json.load(f)
 output_reversal = dict((i, k) for (k, i) in output_alphabet.items())
 
+frac = st.number_input("Fraction of unlabeled data to calculate entropy on", value=0.1)
+
+nrows = unlabeled_df.sample(frac=frac).shape[0]
+pbar = tqdm.tqdm(total=nrows)
+
 def get_entropy(log_probs):
     probs = torch.exp(log_probs)
     return torch.sum(probs * log_probs * -1)
-
-nrows = unlabeled_df.shape[0]
-pbar = tqdm.tqdm(total=nrows)
 
 def forward_pass(word):
     try:
@@ -62,7 +64,7 @@ def calc_entropy(model, df):
 
 if st.button("Calculate entropy"):
     with st.spinner("Calculating entropy..."):
-        entropy = calc_entropy(model, unlabeled_df)
+        entropy = calc_entropy(model, unlabeled_df.sample(frac=frac))
     st.session_state['entropy'] = entropy
     st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
     st.session_state['current_gloss'] = []
@@ -70,6 +72,12 @@ if st.button("Calculate entropy"):
 if st.session_state.get('entropy') is None:
     st.warning("You must calculate the entropy first")
     st.stop()
+
+metadata_dict = os.path.join("datasets", dataset_dir, "metadata.json")
+with open(metadata_dict, "r") as f:
+    dataset_meta = json.load(f)
+
+source_df = pd.read_csv(dataset_meta['source_file'], sep=dataset_meta['sep'])
 
 entropy_df = unlabeled_df.join(st.session_state.entropy)
 try:
@@ -84,6 +92,8 @@ st.write(f"Total entropy = {entropy_df.entropy.sum():.1f}")
 st.write(f"Average entropy = {entropy_df.entropy.mean():.1f}")
 
 st.write(f"Highest entropy word: {highest_entropy_row.word}")
+st.write(f"Source file data on word:")
+st.write(source_df.loc[highest_entropy_row.name])
 st.write("Gloss under construction:")
 st.write(st.session_state.current_gloss)
 

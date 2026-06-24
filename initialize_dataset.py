@@ -60,6 +60,7 @@ if st.button("Instantiate!"):
     with open(metadata_dict, "w") as f:
         json.dump({
             "source_file": words_filename,
+            "sep": sep,
         }, f)
     
     st.success("Initialized!")
