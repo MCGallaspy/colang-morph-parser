@@ -54,6 +54,7 @@ def forward_pass(row):
         entropy = get_entropy(model_out)
     except RuntimeError:
         entropy = 0
+        model_out = None
     pbar.update(1)
     return model_out, entropy
 
@@ -75,9 +76,11 @@ if st.button("Evaluate labeled data"):
     st.write(f"Accuracy: {labeled_df.correct.sum() / labeled_df.shape[0]:.1%}")
     st.write(labeled_df.sort_values(by='entropy', ascending=True))
 
+frac = st.number_input("Fraction of unlabeled data to evaluate model on", value=0.1)
+
 if st.button("Evaluate unlabeled data"):
     with st.spinner("Processing unlabeled data..."):
-        preds = get_preds(model, unlabeled_df)
+        preds = get_preds(model, unlabeled_df.sample(frac=frac))
 
     unlabeled_df = unlabeled_df.join(preds)
     unlabeled_df.entropy = unlabeled_df.entropy.apply(float)
