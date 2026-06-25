@@ -78,6 +78,12 @@ output_specials = [s.strip() for s in output_specials.split(",")]
 output_specials = [s for s in output_specials if s]
 output_tokens |= set(output_specials)
 
+glosses_file = st.file_uploader("Load glosses from file (one per line)")
+
+if glosses_file and st.button("Load from file"):
+    glosses = glosses_file.readlines()
+    output_tokens |= set(glosses)
+
 st.markdown("**Output vocab**")
 indexes = list(range(len(output_tokens)))
 st.session_state.output_vocab = st.session_state.output_vocab.reindex(index=indexes)
