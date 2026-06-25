@@ -77,7 +77,9 @@ training_df['output_sequence'] = training_df.morphology.apply(get_output_sequenc
 losses = []
 num_epochs = st.number_input("Number of epochs", value=10)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+learning_rate = st.number_input("Learning rate", value=1e-4, format="%0.2e")
+
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 criterion = nn.NLLLoss(reduction='sum')
 
 if st.button("Train"):
