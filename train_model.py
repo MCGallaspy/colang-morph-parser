@@ -104,5 +104,10 @@ if st.button("Train"):
     st.success("Model weights saved!")
 
     fig = plt.figure()
+    MAX_PLOT_POINTS = 1000
+    if len(losses) > MAX_PLOT_POINTS:
+        step = len(losses) // MAX_PLOT_POINTS
+        begin, end = losses[0], losses[-1]
+        losses = [begin] + losses[::step] + [end]
     pd.Series(losses).plot(ax=plt.gca())
     st.pyplot(fig)
