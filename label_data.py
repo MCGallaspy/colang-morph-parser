@@ -115,14 +115,17 @@ if st.button("Reset gloss"):
     st.rerun()
 
 if st.button("Finish gloss"):
-    st.session_state.labeled_df.loc[highest_entropy_row.name] = [
-        highest_entropy_row.word,
-        st.session_state.current_gloss,
-    ]
-    st.session_state.current_gloss = []
-    st.rerun()
+    if st.session_state.current_gloss:
+        st.session_state.labeled_df.loc[highest_entropy_row.name] = [
+            highest_entropy_row.word,
+            st.session_state.current_gloss,
+        ]
+        st.session_state.current_gloss = []
+        st.rerun()
 
 st.write("Newly labeled data")
+mask = st.session_state.labeled_df.morphology.apply(lambda x: len(x) == 0)
+st.session_state.labeled_df = st.session_state.labeled_df.loc[~mask]
 st.write(st.session_state.labeled_df)
 
 def add_gloss_start_end(glosses):
