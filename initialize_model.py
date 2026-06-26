@@ -82,6 +82,7 @@ glosses_file = st.file_uploader("Load glosses from file (one per line)")
 
 if glosses_file and st.button("Load from file"):
     glosses = glosses_file.readlines()
+    glosses = [g.strip() for g in glosses]
     output_tokens |= set(glosses)
 
 st.markdown("**Output vocab**")
