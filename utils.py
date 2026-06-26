@@ -30,7 +30,7 @@ def decode_output(seq, output_alphabet_reversal):
 def get_output(model, seq, output_alphabet):
     result = [torch.Tensor([-99999] * len(output_alphabet))]
     result[0][output_alphabet["GLOSS_START"]] = 0
-    MAX_LEN = 200
+    MAX_LEN = 50
     model.eval()
     with torch.no_grad():
         for _ in range(MAX_LEN):
