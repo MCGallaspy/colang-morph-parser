@@ -63,7 +63,7 @@ def get_output_sequence(gloss):
     gloss = [g.strip() for g in gloss.split(";")]
     seq_len = len(gloss)
     output_dim = len(output_dict)
-    y = torch.Tensor([[-99999] * output_dim] * seq_len)
+    y = torch.Tensor([[torch.iinfo(torch.int16).min] * output_dim] * seq_len)
     for seq_idx, g in enumerate(gloss):
         try:
             gloss_idx = output_dict[g]
