@@ -106,6 +106,14 @@ if st.button("Add selected element"):
     st.session_state.current_gloss.append(gloss_element)
     st.rerun()
 
+string_input = st.text_input("Add string input to label (characters must be in output dictionary)")
+if st.button("Add string input") and string_input:
+    if all(s in list(output_alphabet.keys()) for s in string_input):
+        st.session_state.current_gloss += [s for s in string_input]
+        st.rerun()
+    else:
+        st.warning("Not all characters in model's output alphabet")
+
 if st.button("Add UNK"):
     st.session_state.current_gloss.append("UNK")
     st.rerun()
