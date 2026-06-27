@@ -86,9 +86,6 @@ if glosses_file and st.button("Load from file"):
     print(set(glosses))
     output_tokens |= set(glosses)
 
-if len(output_tokens) % 2 == 1:
-    output_tokens |= set(["PAD"])
-
 st.markdown("**Output vocab**")
 indexes = list(range(len(output_tokens)))
 st.session_state.output_vocab = st.session_state.output_vocab.reindex(index=indexes)
@@ -102,13 +99,21 @@ if st.button("Instantiate!"):
     base = os.path.join("models", model_name)
     os.makedirs(base, exist_ok=True)
     input_dict = os.path.join(base, "input_dict.json")
+    
     with open(input_dict, "w") as f:
         json.dump(input_alphabet, f)
     output_dict = os.path.join(base, "output_dict.json")
+    
     with open(output_dict, "w") as f:
         output_alphabet = set(st.session_state.output_vocab.tokens.values)
+        if len(output_alphabet) % 2 == 1:
+            output_alphabet |= set(["PAD"])
+        else:
+            if "PAD" in output_alphabet:
+                output_alphabet.remove("PAD")
         output_alphabet = dict((w, i) for (i, w) in enumerate(output_alphabet))
         json.dump(output_alphabet, f)
+    
     model = SimpleModel(
         d_input=len(input_alphabet),
         num_glosses=len(output_alphabet),
