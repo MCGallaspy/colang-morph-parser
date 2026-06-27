@@ -35,7 +35,7 @@ def get_output(model, seq, output_alphabet):
     with torch.no_grad():
         for _ in range(MAX_LEN):
             mask = torch.nn.Transformer.generate_square_subsequent_mask(len(result))
-            next = model(seq, torch.stack(result), tgt_mask=mask, tgt_is_causal=True)
+            next = model(seq, torch.exp(torch.stack(result)), tgt_mask=mask, tgt_is_causal=True)
             argmax = torch.argmax(next[-1])
             result.append(next[-1])
             if argmax == output_alphabet["GLOSS_END"]:
@@ -45,4 +45,5 @@ def get_output(model, seq, output_alphabet):
 
 def get_entropy(log_probs):
     probs = torch.exp(log_probs)
-    return torch.sum(probs * log_probs * -1)
+    entropy = -1 * torch.sum(probs * log_probs)
+    return entropy

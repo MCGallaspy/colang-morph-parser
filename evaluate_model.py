@@ -6,7 +6,7 @@ import torch
 import tqdm
 
 from models import SimpleModel
-from utils import encode_input, get_output, decode_output
+from utils import encode_input, get_output, decode_output, get_entropy
 
 os.makedirs("models", exist_ok=True)
 model_dirs = os.listdir("models")
@@ -38,10 +38,6 @@ output_dict_fn = os.path.join(base, "output_dict.json")
 with open(output_dict_fn, "r") as f:
     output_alphabet = json.load(f)
 output_reversal = dict((i, k) for (k, i) in output_alphabet.items())
-
-def get_entropy(log_probs):
-    probs = torch.exp(log_probs)
-    return torch.sum(probs * log_probs * -1)
 
 def get_preds(model, df):
     nrows = df.shape[0]

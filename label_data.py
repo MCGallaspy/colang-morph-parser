@@ -6,7 +6,7 @@ import torch
 import tqdm
 
 from models import SimpleModel
-from utils import encode_input, get_output
+from utils import encode_input, get_output, get_entropy
 
 os.makedirs("models", exist_ok=True)
 model_dirs = os.listdir("models")
@@ -42,10 +42,6 @@ frac = st.number_input("Fraction of unlabeled data to calculate entropy on", val
 
 nrows = unlabeled_df.sample(frac=frac).shape[0]
 pbar = tqdm.tqdm(total=nrows)
-
-def get_entropy(log_probs):
-    probs = torch.exp(log_probs)
-    return torch.sum(probs * log_probs * -1)
 
 def forward_pass(word):
     try:
