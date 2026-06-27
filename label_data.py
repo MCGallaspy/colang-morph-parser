@@ -6,7 +6,7 @@ import torch
 import tqdm
 
 from models import SimpleModel
-from utils import encode_input, get_output, get_entropy
+from utils import encode_input, get_output, get_entropy, decode_output
 
 os.makedirs("models", exist_ok=True)
 model_dirs = os.listdir("models")
@@ -40,29 +40,34 @@ with open(output_dict_fn, "r") as f:
     output_alphabet = json.load(f)
 output_reversal = dict((i, k) for (k, i) in output_alphabet.items())
 
-frac = st.number_input("Fraction of unlabeled data to calculate entropy on", value=0.1)
+frac = st.number_input("Fraction of unlabeled words to calculate entropy on", value=0.1)
 
-nrows = unlabeled_df.sample(frac=frac).shape[0]
-pbar = tqdm.tqdm(total=nrows)
+def get_preds(model, df):
+    nrows = df.shape[0]
+    pbar = tqdm.tqdm(total=nrows)
 
-def forward_pass(word):
-    try:
-        encoded = encode_input(word, input_dict)
-        model_out = get_output(model, encoded, output_alphabet)
-        entropy = get_entropy(model_out)
-    except RuntimeError:
-        entropy = 0
-    pbar.update(1)
-    return entropy
+    def forward_pass(row):
+        word = row.word
+        try:
+            encoded = encode_input(word, input_dict)
+            model_out = get_output(model, encoded, output_alphabet)
+            entropy = get_entropy(model_out)
+        except RuntimeError:
+            entropy = 0
+            model_out = None
+        pbar.update(1)
+        return model_out, entropy
 
-def calc_entropy(model, df):
-    result = df.word.apply(forward_pass)
-    result.name = 'entropy'
+    result = df.apply(forward_pass, axis=1, result_type='expand')
+    result.columns = ['pred', 'entropy']
+    reversal = dict((v, k) for (k, v) in output_alphabet.items())
+    result.pred = result.pred.apply(lambda x: decode_output(x, reversal))
     return result
+
 
 if st.button("Calculate entropy"):
     with st.spinner("Calculating entropy..."):
-        entropy = calc_entropy(model, unlabeled_df.sample(frac=frac))
+        entropy = get_preds(model, unlabeled_df.sample(frac=frac))
     st.session_state['entropy'] = entropy
     st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
     st.session_state['current_gloss'] = []
@@ -94,6 +99,11 @@ st.write(f"Source file data on word:")
 st.write(source_df.loc[highest_entropy_row.name])
 st.write("Gloss under construction:")
 st.write(st.session_state.current_gloss)
+st.write(f"Model guess: {';'.join(highest_entropy_row.pred)}")
+
+if st.button("Use model guess"):
+    st.session_state.current_gloss = highest_entropy_row.pred
+    st.rerun()
 
 gloss_element = st.selectbox(
     "Add gloss element",
@@ -129,7 +139,7 @@ if st.button("Finish gloss"):
         st.session_state.current_gloss = []
         st.rerun()
 
-st.write("Newly labeled data")
+st.write("Newly labeled words")
 mask = st.session_state.labeled_df.morphology.apply(lambda x: len(x) == 0)
 st.session_state.labeled_df = st.session_state.labeled_df.loc[~mask]
 st.write(st.session_state.labeled_df)
