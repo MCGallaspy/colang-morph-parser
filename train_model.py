@@ -93,9 +93,10 @@ if st.button("Train"):
                 tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.shape[0])
                 pred = model(X, y, tgt_mask=tgt_mask, tgt_is_causal=True)
                 actual_labels = torch.argmax(row.output_sequence[1:], axis=1)
-                loss = criterion(pred, actual_labels)
-                epoch_loss += loss
+                loss = criterion(pred, actual_labels) / len(pred)
+                epoch_loss += loss 
             epoch_loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0, norm_type=2)
             optimizer.step()
             optimizer.zero_grad()
             losses.append(epoch_loss.detach().item() / training_df.shape[0])
