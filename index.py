@@ -6,6 +6,7 @@ pg = st.navigation([
     st.Page("label_data.py", title="label word lists"),
     st.Page("train_model.py"),
     st.Page("evaluate_model.py"),
+    st.Page("parser.py"),
 ])
 
 pg.run()
