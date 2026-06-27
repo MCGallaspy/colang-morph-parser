@@ -18,7 +18,7 @@ model_dir = st.selectbox(
 os.makedirs("datasets", exist_ok=True)
 datasets = os.listdir("datasets")
 dataset_dir = st.selectbox(
-    "Choose a dataset:",
+    "Choose a word list:",
     datasets,
 )
 

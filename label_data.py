@@ -18,12 +18,12 @@ model_dir = st.selectbox(
 os.makedirs("datasets", exist_ok=True)
 datasets = os.listdir("datasets")
 dataset_dir = st.selectbox(
-    "Choose a dataset:",
+    "Choose a word list:",
     datasets,
 )
 
 if model_dir is None or dataset_dir is None:
-    st.error("Initialize a model and dataset first")
+    st.error("Initialize a model and word list first")
     st.stop()
 
 model = torch.load(os.path.join("models", model_dir, "model.pt"), weights_only=False)

@@ -31,8 +31,8 @@ morph_col = st.selectbox(
     ["None"] + cols,
 )
 
-st.subheader("Instantiate dataset")
-dataset_name = st.text_input("Dataset name", value="my cool dataset")
+st.subheader("Instantiate word list")
+dataset_name = st.text_input("Word list name", value="my cool word list")
 
 fraction = st.number_input("Select a fraction of the unlabeled words to input", value=1.0)
 
