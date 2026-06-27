@@ -86,6 +86,9 @@ if glosses_file and st.button("Load from file"):
     print(set(glosses))
     output_tokens |= set(glosses)
 
+if len(output_tokens) % 2 == 1:
+    output_tokens |= set(["PAD"])
+
 st.markdown("**Output vocab**")
 indexes = list(range(len(output_tokens)))
 st.session_state.output_vocab = st.session_state.output_vocab.reindex(index=indexes)
