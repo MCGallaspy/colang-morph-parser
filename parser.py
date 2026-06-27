@@ -26,6 +26,7 @@ class Evaluator:
             self.output_alphabet = json.load(f)
         self.output_reversal = dict((i, k) for (k, i) in self.output_alphabet.items())
         self.model = model
+        self.name = model_dir
 
     def get_preds(self, word):
         try:
@@ -47,6 +48,11 @@ models = st.multiselect(
     model_dirs,
 )
 
+seps = {}
+for model in models:
+    sep = st.text_input(f"Output separator for {model}")
+    seps[model] = sep
+
 lang_text = st.text_area("Text to parse")
 
 if st.button("Parse"):
@@ -57,8 +63,17 @@ if st.button("Parse"):
         for word in re.split(r"\s+", lang_text):
             for parser in parsers:
                 try:
-                    parses[word] += [parser.get_preds(word)]
+                    parses[word] += [(parser.name, parser.get_preds(word))]
                 except KeyError:
-                    parses[word] = [parser.get_preds(word)]
-
-    st.write(parses)
+                    parses[word] = [(parser.name, parser.get_preds(word))]
+    
+    for word in parses.keys():
+        st.markdown(f"## {word}")
+        for parser, results in parses[word]:
+            preds = results['preds']
+            try:
+                preds = preds[1:-1]
+            except IndexError:
+                preds = ['error']
+            preds = seps[parser].join(preds)
+            st.markdown(f"**{parser}**: {preds}")
