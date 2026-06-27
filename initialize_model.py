@@ -110,5 +110,9 @@ if st.button("Instantiate!"):
         d_input=len(input_alphabet),
         num_glosses=len(output_alphabet),
     )
-    torch.save(model, os.path.join(base, "model.pt"))
+    torch.save({
+        "d_input": len(input_alphabet),
+        "num_glosses": len(output_alphabet),
+        "weights": model.state_dict(),
+    }, os.path.join(base, "model.pt"))
     st.success("Initialized!")

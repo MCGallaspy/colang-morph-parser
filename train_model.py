@@ -27,7 +27,9 @@ if model_dir is None or dataset_dir is None:
     st.error("Initialize a model and dataset first")
     st.stop()
 
-model = torch.load(os.path.join("models", model_dir, "model.pt"), weights_only=False)
+model_dict = torch.load(os.path.join("models", model_dir, "model.pt"))
+model = SimpleModel(model_dict['d_input'], model_dict['num_glosses'])
+model.load_state_dict(model_dict['weights'])
 training_df = pd.read_csv(os.path.join("datasets", dataset_dir, "labeled.tsv"), sep="\t", index_col=0)
 
 base = os.path.join('models', model_dir)
@@ -101,7 +103,11 @@ if st.button("Train"):
             optimizer.zero_grad()
             losses.append(epoch_loss.detach().item() / training_df.shape[0])
 
-    torch.save(model, os.path.join(base, "model.pt"))
+        torch.save({
+            "d_input": model.d_input,
+            "num_glosses": model.num_glosses,
+            "weights": model.state_dict(),
+        }, os.path.join(base, "model.pt"))
     st.success("Model weights saved!")
 
     fig = plt.figure()

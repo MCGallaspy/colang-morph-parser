@@ -38,6 +38,9 @@ class SimpleModel(torch.nn.Module):
         )
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
+        self.d_input = d_input
+        self.num_glosses = num_glosses
+        
         pos_encoding = torch.zeros(max_len, num_glosses, requires_grad=False)
         positions_list = torch.arange(0, max_len, dtype=torch.float).view(-1, 1)
         division_term = torch.exp(torch.arange(0, num_glosses, 2).float() * (-math.log(10000.0)) / num_glosses)

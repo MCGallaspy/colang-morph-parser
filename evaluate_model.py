@@ -26,7 +26,9 @@ if model_dir is None or dataset_dir is None:
     st.error("Initialize a model and dataset first")
     st.stop()
 
-model = torch.load(os.path.join("models", model_dir, "model.pt"), weights_only=False)
+model_dict = torch.load(os.path.join("models", model_dir, "model.pt"))
+model = SimpleModel(model_dict['d_input'], model_dict['num_glosses'])
+model.load_state_dict(model_dict['weights'])
 unlabeled_df = pd.read_csv(os.path.join("datasets", dataset_dir, "unlabeled.tsv"), sep="\t", index_col=0)
 labeled_df = pd.read_csv(os.path.join("datasets", dataset_dir, "labeled.tsv"), sep="\t", index_col=0)
 
