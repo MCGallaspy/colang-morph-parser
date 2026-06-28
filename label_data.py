@@ -151,7 +151,7 @@ def add_gloss_start_end(glosses):
         glosses += ["GLOSS_END"]
     return glosses
 
-if st.button("Update datasets"):
+if st.button("Update word list"):
     base = os.path.join("datasets", dataset_dir)
     labeled_df = st.session_state.labeled_df
     labeled_df["morphology"] = labeled_df["morphology"].apply(add_gloss_start_end).apply(lambda xs: ";".join(xs))

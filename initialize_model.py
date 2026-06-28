@@ -12,7 +12,7 @@ st.subheader("Input specification")
 
 dataset_dirs = os.listdir("datasets")
 dataset_dir = st.selectbox(
-    "Choose a dataset on which to train:",
+    "Choose a word list on which to train:",
     dataset_dirs,
 )
 
