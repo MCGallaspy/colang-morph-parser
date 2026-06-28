@@ -38,7 +38,8 @@ class Evaluator:
             model_out = None
 
         preds = decode_output(model_out, self.output_reversal)
-        return {"preds": preds, "entropy": entropy}
+        probs = torch.max(torch.exp(model_out), dim=1)[0][1:-1]
+        return {"preds": preds, "entropy": entropy, "probs": probs}
 
 
 os.makedirs("models", exist_ok=True)
@@ -77,3 +78,4 @@ if st.button("Parse"):
                 preds = ['error']
             preds = seps[parser].join(preds)
             st.markdown(f"**{parser}**: {preds}")
+            st.markdown(f"Mean probability: {torch.mean(results['probs']).item():.1%}", )
