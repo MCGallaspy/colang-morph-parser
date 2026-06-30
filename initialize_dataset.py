@@ -66,7 +66,7 @@ if st.button("Instantiate!"):
     metadata_dict = os.path.join(base, "metadata.json")
     with open(metadata_dict, "w") as f:
         json.dump({
-            "source_file": words_filename,
+            "source_file": os.path.realpath(words_filename),
             "sep": sep,
         }, f)
     
