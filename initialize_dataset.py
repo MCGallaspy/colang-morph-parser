@@ -31,6 +31,13 @@ morph_col = st.selectbox(
     ["None"] + cols,
 )
 
+if morph_col != "None":
+    num_glossed = df[morph_col].isna().sum()
+    print("num glossed", num_glossed, " / ", df.shape[0])
+    if num_glossed == 0:
+        st.warning("Morphology is given for all words already!"
+                   " Add some unlabeled words to the word list.")
+
 st.subheader("Instantiate word list")
 dataset_name = st.text_input("Word list name", value="my cool word list")
 
