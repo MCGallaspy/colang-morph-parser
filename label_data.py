@@ -97,7 +97,7 @@ st.write(f"Average entropy = {entropy_df.entropy.mean():.1f}")
 st.write(f"Highest entropy word: {highest_entropy_row.word} (entropy={highest_entropy_row.entropy:.2f})")
 st.write(f"Source file data on word:")
 st.write(source_df.loc[highest_entropy_row.name])
-st.write("Gloss under construction:")
+st.write("Label under construction:")
 st.write(st.session_state.current_gloss)
 st.write(f"Model guess: {';'.join(highest_entropy_row.pred)}")
 
@@ -106,7 +106,7 @@ if st.button("Use model guess"):
     st.rerun()
 
 gloss_element = st.selectbox(
-    "Add gloss element",
+    "Add Label element",
     list(output_alphabet.keys()),
 )
 
@@ -126,11 +126,11 @@ if st.button("Add UNK"):
     st.session_state.current_gloss.append("UNK")
     st.rerun()
 
-if st.button("Reset gloss"):
+if st.button("Reset label"):
     st.session_state.current_gloss = []
     st.rerun()
 
-if st.button("Finish gloss"):
+if st.button("Finish label"):
     if st.session_state.current_gloss:
         st.session_state.labeled_df.loc[highest_entropy_row.name] = [
             highest_entropy_row.word,
