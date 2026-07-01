@@ -51,7 +51,7 @@ def get_preds(model, df):
         try:
             encoded = encode_input(word, input_dict)
             model_out = get_output(model, encoded, output_alphabet)
-            entropy = get_entropy(model_out)
+            entropy = get_entropy(model_out).item()
         except RuntimeError:
             entropy = 0
             model_out = None
@@ -65,9 +65,28 @@ def get_preds(model, df):
     return result
 
 
+def persist_entropy(df, fname):
+    df = df.copy()
+    df['pred'] = df['pred'].apply(lambda xs: ';'.join(xs))
+    df.to_csv(fname)
+
+def unpersist_entropy(fname):
+    df = pd.read_csv(fname, index_col=0)
+    df['pred'] = df['pred'].apply(lambda x: x.split(';'))
+    return df
+
+entropy_filename = f"{dataset_dir}_entropy.csv"
+entropy_filename = os.path.join("models", model_dir, entropy_filename)
+try:
+    entropy = unpersist_entropy(entropy_filename)
+    st.session_state['entropy'] = entropy
+except FileNotFoundError:
+    st.session_state['entropy'] = None
+
 if st.button("Calculate entropy"):
     with st.spinner("Calculating entropy..."):
         entropy = get_preds(model, unlabeled_df.sample(frac=frac))
+    persist_entropy(entropy, entropy_filename)
     st.session_state['entropy'] = entropy
     st.session_state['labeled_df'] = pd.DataFrame(columns=["word", "morphology"])
     st.session_state['current_gloss'] = []
