@@ -40,7 +40,7 @@ with open(output_dict_fn, "r") as f:
     output_alphabet = json.load(f)
 output_reversal = dict((i, k) for (k, i) in output_alphabet.items())
 
-frac = st.number_input("Fraction of unlabeled words to calculate entropy on", value=0.1)
+frac = st.number_input("Fraction of unlabeled words to calculate entropy on", value=0.1, format="%0.10g")
 
 def get_preds(model, df):
     nrows = df.shape[0]
